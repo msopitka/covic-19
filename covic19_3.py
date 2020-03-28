@@ -114,7 +114,9 @@ def gen_Deaths_to_Confirmed_by_Country(deaths,confirmed):
     Deaths_to_Confirmed = deaths/confirmed
     return Deaths_to_Confirmed
 
+#sub_countries=[]
 def plot(dates,title, lgscale,*countries):
+    #sub_countries=[]
     fig, ax = plt.subplots(figsize=(7,4))
     fig.figimage(img, 40, 130, zorder=10, alpha=0.6,resize=False)
     now=datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
@@ -123,13 +125,33 @@ def plot(dates,title, lgscale,*countries):
          ha='right', va='top', alpha=0.8)
     #if title=='# of New Cases':
     n = len(countries)//2
-    if len(dates)!=len(countries[-1]):
+    m = len(countries)
+    #sub_countries=countries[n:m]
+    min_size = len(countries[n])
+    for country in countries[n:m]:
+        country_size = len(country)
+        if country_size < min_size:
+            min_size = country_size
+    new_Y_size=min_size
+    #*country=np.array(new_Y_size)
+    rows, cols = (n,n) 
+    country = [[0]*cols]*rows
+    #print(f'min_size: {new_Y_size}')
+    if len(dates)!=new_Y_size:
             dates=dates[:-1] #taking the last element out
+            
     for i in range(n):
-        plt.plot(dates,countries[n+i],label=f'{countries[i]}')
+        #print(f'i: {i}, n: {n}')
+        country[i]=countries[n+i]
+        #print(f'country[{i}]: {country[i]}')
+        if len(country[i])>new_Y_size:
+            country[i]=country[i][:-1]
+    for i in range(n):
+        plt.plot(dates,country[i],label=f'{countries[i]}')
+        #plt.plot(dates,countries[n+i],label=f'{countries[i]}')
     if lgscale == True:
         plt.yscale('log')
-    plt.xlabel('day')
+    plt.xlabel('# of days since Jan 22,2020')
     plt.title(title,fontsize=12,fontweight='bold',loc='right')
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, borderaxespad=0.)
@@ -330,7 +352,7 @@ plot(dates,'Recovered-to-Confirmed Ratios',False,\
 plot(dates,'China',True,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
     'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',Ch_Confirmed[:-1],\
     Ch_New_Cases,Ch_Active,Ch_Deaths[:-1],Ch_New_Deaths,Ch_Recovered,\
-    Ch_Deaths_to_Confirmed[:-1],Ch_Recovered_to_Confirmed,Ta_Recovered_to_Confirmed))
+    Ch_Deaths_to_Confirmed[:-1],Ch_Recovered_to_Confirmed,Ch_Recovered_to_Confirmed))
     
 plot(dates,'Thailand',False,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
                           'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
