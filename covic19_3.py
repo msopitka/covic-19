@@ -48,7 +48,12 @@ def get_Data_List(file_Name):
     return file_List
 
 def get_Dates(file_List):
-    dates=np.array(range(1,len(file_List[0])-3)) 
+    #generate date string, e.g., '1/22/20'
+    dates=np.array(confirmed_lines[0][4:])
+    dates=list(dates)
+    
+    #generate day numbers from Jan 1, 2020
+    #dates=np.array(range(1,len(file_List[0])-3)) 
     return dates
 
 def get_Index_by_Country(file,country):
@@ -120,9 +125,10 @@ def plot(dates,title, lgscale,*countries):
     fig, ax = plt.subplots(figsize=(7,4))
     fig.figimage(img, 40, 130, zorder=10, alpha=0.6,resize=False)
     now=datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
-    fig.text(0.95, 0.05, now, fontfamily='monospace',
-         fontsize=8, color='gray',
-         ha='right', va='top', alpha=0.8)
+    #fig.text(0.95, 0.05, now, fontfamily='monospace',
+    fig.text(0, 1, now, fontfamily='monospace',
+         fontsize=8, color='blue', transform=ax.transAxes,
+         ha='left', va='top', alpha=0.8)
     #if title=='# of New Cases':
     n = len(countries)//2
     m = len(countries)
@@ -151,7 +157,9 @@ def plot(dates,title, lgscale,*countries):
         #plt.plot(dates,countries[n+i],label=f'{countries[i]}')
     if lgscale == True:
         plt.yscale('log')
-    plt.xlabel('# of days since Jan 22,2020')
+    plt.xticks(rotation=90, fontsize=5) #rotate x axis text 90 degrees
+    plt.xlabel('Dates') #eg, '1/22/20'
+    #plt.xlabel('# of days since Jan 22,2020')
     plt.title(title,fontsize=12,fontweight='bold',loc='right')
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
            ncol=2, borderaxespad=0.)
@@ -159,11 +167,10 @@ def plot(dates,title, lgscale,*countries):
     plt.show()
     
 def print_Dates(dates,confirmed_lines):
-    #confirmed_lines_List=confirmed_lines.splitlines()
-    #confirmed_lines_List=confirmed_lines.split(',')
-    print('\nDates:')
+    print(f'\nDates:\n{dates}')
     for i in range(4,len(dates)+4):
-        print(f'{confirmed_lines[i]} ', end='')
+        #print(f'{confirmed_lines[i]} ', end='')
+        pass
             
 def showtable(dates,title, *countries):
     global printed_Dates
