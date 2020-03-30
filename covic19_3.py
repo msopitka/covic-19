@@ -58,7 +58,8 @@ def get_Dates(file_List):
 
 def get_Index_by_Country(file,country):
     for i in range(len(file)):
-        if file[i][1]==country:
+        if country in file[i][1]:
+        #if file[i][1]==country:
             #print(f'index = {i}')
             return i
     print(f"Error can't find {country}")
@@ -88,8 +89,12 @@ def get_Data_by_Country(fileList,country):
             temp=0
     else: #only country with single line
         index=get_Index_by_Country(fileList,country)
-        if index!=-1:
+        #print(f'index: {index}')
+        if index!=-1 and country!='Korea':
             country_List=fileList[index][4:]
+            country_List = [int(x) for x in country_List if x!='']
+        elif index!=-1:
+            country_List=fileList[index][5:]
             country_List = [int(x) for x in country_List if x!='']
     data_Array=np.array(country_List)
     return data_Array
@@ -122,7 +127,7 @@ def gen_Deaths_to_Confirmed_by_Country(deaths,confirmed):
 #sub_countries=[]
 def plot(dates,title, lgscale,*countries):
     #sub_countries=[]
-    fig, ax = plt.subplots(figsize=(7,4))
+    fig, ax = plt.subplots(figsize=(8,4))
     fig.figimage(img, 40, 130, zorder=10, alpha=0.6,resize=False)
     now=datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
     #fig.text(0.95, 0.05, now, fontfamily='monospace',
@@ -165,6 +170,52 @@ def plot(dates,title, lgscale,*countries):
            ncol=2, borderaxespad=0.)
     plt.grid()
     plt.show()
+
+def plot_Trajectory(*countries):
+    fig, ax = plt.subplots(figsize=(9,4))
+    fig.figimage(img, 50, 130, zorder=10, alpha=0.6,resize=False)
+    now=datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+    fig.text(0, 1, now, fontfamily='monospace',
+         fontsize=8, color='blue', transform=ax.transAxes,
+         ha='left', va='top', alpha=0.8)
+    
+    i=0
+    n = len(countries)//3
+    rows, cols = (n,n) 
+    Confirmed = [[0]*cols]*rows
+    New_Cases = [[0]*cols]*rows
+    Weekly_New_Cases = [[] for i in range(n)] #create empty array of n countries
+    
+    for i in range(n):
+        #print(f'i: {i}, n: {n}')
+        Confirmed[i]=countries[n+i]
+        New_Cases[i]=countries[2*n+i]
+        print(f'Confirmed[{countries[i]}]: {Confirmed[i]}\n')
+        print(f'New_Cases[{countries[i]}]: {New_Cases[i]}\n')
+    
+    #print(f'len(countries[-1]): {len(countries[-1])}')
+    week_sum=0
+    for i in range(n):
+        for j in range(len(countries[-1])-6):
+            week_sum=sum(New_Cases[i][j:j+7])
+            #print(f'week_sum: {week_sum} ', end='')
+            Weekly_New_Cases[i].append(week_sum)
+        print(f'Weekly_New_Cases[{countries[i]}]: {Weekly_New_Cases[i]}\n')
+    #print(f'{Weekly_New_Cases}')
+    
+    for i in range(n):
+        plt.plot(Confirmed[i][7:],Weekly_New_Cases[i],label=f'{countries[i]}')
+        #plt.plot(Confirmed[i][7:],y_list,label=f'{countries[i]}')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.title('Trajectory of COVID-19 Confirmed Cases',fontsize=12,fontweight='bold',loc='right')
+    plt.xlabel('Total Confirmed Cases')
+    plt.ylabel('Weekly New Confirmed Cases')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
+           ncol=2, borderaxespad=0.)
+    
+    plt.grid()
+    plt.show()    
     
 def print_Dates(dates,confirmed_lines):
     print(f'\nDates:\n{dates}')
@@ -203,6 +254,7 @@ Sp_Confirmed = get_Data_by_Country(confirmed_lines,'Spain')
 Jp_Confirmed = get_Data_by_Country(confirmed_lines,'Japan')
 Sg_Confirmed = get_Data_by_Country(confirmed_lines,'Singapore')
 Ta_Confirmed = get_Data_by_Country(confirmed_lines,'Taiwan*')
+Ko_Confirmed = get_Data_by_Country(confirmed_lines,'Korea')
 
 Ch_New_Cases = gen_New_Cases_by_Country(Ch_Confirmed)
 Th_New_Cases = gen_New_Cases_by_Country(Th_Confirmed)
@@ -213,6 +265,7 @@ Sp_New_Cases = gen_New_Cases_by_Country(Sp_Confirmed)
 Jp_New_Cases = gen_New_Cases_by_Country(Jp_Confirmed)
 Sg_New_Cases = gen_New_Cases_by_Country(Sg_Confirmed)
 Ta_New_Cases = gen_New_Cases_by_Country(Ta_Confirmed)
+Ko_New_Cases = gen_New_Cases_by_Country(Ko_Confirmed)
 
 Ch_Deaths = get_Data_by_Country(deaths_lines,'China')
 Th_Deaths = get_Data_by_Country(deaths_lines,'Thailand')
@@ -243,6 +296,16 @@ Sp_Recovered = get_Data_by_Country(recovered_lines,'Spain')
 Jp_Recovered = get_Data_by_Country(recovered_lines,'Japan')
 Sg_Recovered = get_Data_by_Country(recovered_lines,'Singapore')
 Ta_Recovered = get_Data_by_Country(recovered_lines,'Taiwan*')
+
+Ch_New_Recovered = gen_New_Cases_by_Country(Ch_Recovered)
+Th_New_Recovered = gen_New_Cases_by_Country(Th_Recovered)
+US_New_Recovered = gen_New_Cases_by_Country(US_Recovered)
+It_New_Recovered = gen_New_Cases_by_Country(It_Recovered)
+Gr_New_Recovered = gen_New_Cases_by_Country(Gr_Recovered)
+Sp_New_Recovered = gen_New_Cases_by_Country(Sp_Recovered)
+Jp_New_Recovered = gen_New_Cases_by_Country(Jp_Recovered)
+Sg_New_Recovered = gen_New_Cases_by_Country(Sg_Recovered)
+Ta_New_Recovered = gen_New_Cases_by_Country(Ta_Recovered)
 
 Ch_Deaths_to_Confirmed = gen_Deaths_to_Confirmed_by_Country(Ch_Deaths,Ch_Confirmed)
 Th_Deaths_to_Confirmed = gen_Deaths_to_Confirmed_by_Country(Th_Deaths,Th_Confirmed)
@@ -286,6 +349,7 @@ else:
     Sg_Recovered_to_Confirmed = Sg_Recovered/Sg_Confirmed[0:len(Sp_Confirmed)-1]
     Ta_Recovered_to_Confirmed = Ta_Recovered/Ta_Confirmed[0:len(Sp_Confirmed)-1]
     
+'''
 showtable(dates, 'Confirmed', *('Thailand','China','US','Italy','Germany','Spain',\
     'Japan','Singapore','Taiwan',Th_Confirmed,Ch_Confirmed,US_Confirmed,It_Confirmed,\
     Gr_Confirmed,Sp_Confirmed,Jp_Confirmed,Sg_Confirmed),Ta_Confirmed)
@@ -313,7 +377,16 @@ showtable(dates, 'Recovered to Confirmed', \
           *('Thailand','China','US','Italy','Germany','Spain','Japan','Singapore', \
           Th_Recovered_to_Confirmed,Ch_Recovered_to_Confirmed,US_Recovered_to_Confirmed,It_Recovered_to_Confirmed,\
               Gr_Recovered_to_Confirmed,Sp_Recovered_to_Confirmed,Jp_Recovered_to_Confirmed,Sg_Recovered_to_Confirmed))
+'''
 
+plot_Trajectory(*('Thailand','China','South Korea','US','Italy','Germany','Spain','Japan',\
+                  'Singapore','Taiwan',\
+                Th_Confirmed,Ch_Confirmed,Ko_Confirmed,US_Confirmed,It_Confirmed,Gr_Confirmed,\
+                Sp_Confirmed,Jp_Confirmed,Sg_Confirmed,Ta_Confirmed,\
+                Th_New_Cases,Ch_New_Cases,Ko_New_Cases,US_New_Cases,It_New_Cases,Gr_New_Cases,\
+                Sp_New_Cases,Jp_New_Cases,Sg_New_Cases,Ta_New_Cases))
+
+    
 plot(dates,'# of Confirmed Cases',True,*('Thailand','China','US','Italy',\
         'Germany','Spain','Japan','Singapore','Taiwan', \
         Th_Confirmed,Ch_Confirmed,US_Confirmed,It_Confirmed,Gr_Confirmed,\
@@ -323,6 +396,11 @@ plot(dates,'# of New Cases',True,*('Thailand','China','US','Italy','Germany',\
         'Spain','Japan','Singapore','Taiwan', \
         Th_New_Cases,Ch_New_Cases,US_New_Cases,It_New_Cases,Gr_New_Cases,\
         Sp_New_Cases,Jp_New_Cases,Sg_New_Cases,Ta_New_Cases))
+
+plot(dates,'# of Newly Recovered',True,*('Thailand','China','US','Italy','Germany',\
+        'Spain','Japan','Singapore','Taiwan', \
+        Th_New_Recovered,Ch_New_Recovered,US_New_Recovered,It_New_Recovered,Gr_New_Recovered,\
+        Sp_New_Recovered,Jp_New_Recovered,Sg_New_Recovered,Ta_New_Recovered))
 
 plot(dates,'# of Active Cases',True,*('Thailand','China','US','Italy','Germany',\
         'Spain','Japan','Singapore','Taiwan', \
@@ -356,50 +434,67 @@ plot(dates,'Recovered-to-Confirmed Ratios',False,\
     It_Recovered_to_Confirmed,Gr_Recovered_to_Confirmed,Sp_Recovered_to_Confirmed,\
     Jp_Recovered_to_Confirmed,Sg_Recovered_to_Confirmed,Ta_Recovered_to_Confirmed))
 
+    
 plot(dates,'China',True,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
     'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',Ch_Confirmed[:-1],\
     Ch_New_Cases,Ch_Active,Ch_Deaths[:-1],Ch_New_Deaths,Ch_Recovered,\
     Ch_Deaths_to_Confirmed[:-1],Ch_Recovered_to_Confirmed,Ch_Recovered_to_Confirmed))
     
 plot(dates,'Thailand',False,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        Th_Confirmed[:-1],Th_New_Cases,Th_Active,Th_Deaths[:-1],Th_New_Deaths,\
-                        Th_Recovered,Th_Deaths_to_Confirmed[:-1],Th_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        Th_Confirmed,Th_New_Cases,Th_Active,Th_Deaths,Th_New_Deaths,\
+                        Th_Recovered,Th_Deaths_to_Confirmed,Th_Recovered_to_Confirmed,\
+                        Th_New_Recovered))
 
 plot(dates,'US',True,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
                           'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        US_Confirmed[:-1],US_New_Cases,US_Active,US_Deaths[:-1],US_New_Deaths,\
-                        US_Recovered,US_Deaths_to_Confirmed[:-1],US_Recovered_to_Confirmed))
+                        'Newly Recovered Cases',\
+                        US_Confirmed,US_New_Cases,US_Active,US_Deaths,US_New_Deaths,\
+                        US_Recovered,US_Deaths_to_Confirmed,US_Recovered_to_Confirmed,\
+                        US_New_Recovered))
 
 plot(dates,'Italy',True,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        It_Confirmed[:-1],It_New_Cases,It_Active,US_Deaths[:-1],It_New_Deaths,\
-                        It_Recovered,It_Deaths_to_Confirmed[:-1],It_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        It_Confirmed,It_New_Cases,It_Active,US_Deaths,It_New_Deaths,\
+                        It_Recovered,It_Deaths_to_Confirmed,It_Recovered_to_Confirmed,\
+                        It_New_Recovered))
 
 plot(dates,'Germany',True,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        Gr_Confirmed[:-1],Gr_New_Cases,Gr_Active,Gr_Deaths[:-1],Gr_New_Deaths,\
-                        Gr_Recovered,Gr_Deaths_to_Confirmed[:-1],Gr_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        Gr_Confirmed,Gr_New_Cases,Gr_Active,Gr_Deaths,Gr_New_Deaths,\
+                        Gr_Recovered,Gr_Deaths_to_Confirmed,Gr_Recovered_to_Confirmed,\
+                        Gr_New_Recovered))
 
 plot(dates,'Spain',True,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        Sp_Confirmed[:-1],Sp_New_Cases,Sp_Active,Sp_Deaths[:-1],Sp_New_Deaths,\
-                        Sp_Recovered,Sp_Deaths_to_Confirmed[:-1],Sp_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        Sp_Confirmed,Sp_New_Cases,Sp_Active,Sp_Deaths,Sp_New_Deaths,\
+                        Sp_Recovered,Sp_Deaths_to_Confirmed,Sp_Recovered_to_Confirmed,\
+                        Sp_New_Recovered))
 
 plot(dates,'Japan',False,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        Jp_Confirmed[:-1],Jp_New_Cases,Jp_Active,Jp_Deaths[:-1],Jp_New_Deaths,\
-                        Jp_Recovered,Jp_Deaths_to_Confirmed[:-1],Jp_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        Jp_Confirmed,Jp_New_Cases,Jp_Active,Jp_Deaths,Jp_New_Deaths,\
+                        Jp_Recovered,Jp_Deaths_to_Confirmed,Jp_Recovered_to_Confirmed,\
+                        Jp_New_Recovered))
 
 plot(dates,'Singapore',False,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        Sg_Confirmed[:-1],Sg_New_Cases,Sg_Active,Sg_Deaths[:-1],Sg_New_Deaths,\
-                        Sg_Recovered,Sg_Deaths_to_Confirmed[:-1],Sg_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        Sg_Confirmed,Sg_New_Cases,Sg_Active,Sg_Deaths,Sg_New_Deaths,\
+                        Sg_Recovered,Sg_Deaths_to_Confirmed,Sg_Recovered_to_Confirmed,\
+                        Sg_New_Recovered))
 
 plot(dates,'Taiwan',False,*('Confirmed','New Cases','Active','Deaths','New Deaths',\
-                          'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
-                        Ta_Confirmed[:-1],Ta_New_Cases,Ta_Active,Ta_Deaths[:-1],Ta_New_Deaths,\
-                        Ta_Recovered,Ta_Deaths_to_Confirmed[:-1],Ta_Recovered_to_Confirmed))
+                        'Recovered','Deaths-to-Confirmed','Recovered-to-Confirmed',\
+                        'Newly Recovered Cases',\
+                        Ta_Confirmed,Ta_New_Cases,Ta_Active,Ta_Deaths,Ta_New_Deaths,\
+                        Ta_Recovered,Ta_Deaths_to_Confirmed,Ta_Recovered_to_Confirmed,\
+                        Ta_New_Recovered))
 
 # -*- coding: utf-8 -*-
 """
